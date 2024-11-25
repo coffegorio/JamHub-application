@@ -47,6 +47,8 @@ class AuthScreenVC: UIViewController {
         view.addGestureRecognizer(tapGesture)
         
         backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
+        forgotPasswordButton.addTarget(self, action: #selector(goToForgotPassword), for: .touchUpInside)
+        registerButton.addTarget(self, action: #selector(goToRegister), for: .touchUpInside)
         
         self.view.backgroundColor = Styles.Colors.appBackgoundColor
         
@@ -185,6 +187,16 @@ class AuthScreenVC: UIViewController {
     
     @objc private func dismissKeyboard() {
         view.endEditing(true)
+    }
+    
+    @objc private func goToRegister() {
+        let registerScreenVC = RegistrationVC()
+        navigationController?.pushViewController(registerScreenVC, animated: true)
+    }
+    
+    @objc private func goToForgotPassword() {
+        let forgotPasswordScreenVC = ForgotPasswordVC()
+        navigationController?.pushViewController(forgotPasswordScreenVC, animated: true)
     }
     
     @objc private func backButtonTapped() {

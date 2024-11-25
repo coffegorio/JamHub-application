@@ -23,16 +23,14 @@ class TextField: UITextField {
         super.init(frame: .zero)
         
         self.placeholder = placeholder
-        self.textColor = .gray
+        self.textColor = .lightGray
         self.textAlignment = .left
         self.backgroundColor = Styles.Colors.appBackgoundColor
         
-        // Добавляем отступ слева
         let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: leftPadding, height: 1))
         self.leftView = paddingView
         self.leftViewMode = .always
-        
-        // Убираем автоматические ограничения
+
         self.translatesAutoresizingMaskIntoConstraints = false
     }
     
