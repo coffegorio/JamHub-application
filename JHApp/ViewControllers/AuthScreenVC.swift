@@ -16,7 +16,7 @@ class AuthScreenVC: UIViewController {
     private let titleLabel = TitleLabel(text: "Войдите в свою учетную запись")
     private let subTitleLabel = SubTitleLabel(text: "Войдите в свой аккаунт, чтобы получить полный доступ ко всем возможностям нашего приложения")
     private let authRectangleView = ComponentsBackground(cornerRadius: 16, corners: [.allCorners])
-    private let loginLabel = DefaultLabel(text: "Логин", fontSize: 18, weight: .regular)
+    private let loginLabel = DefaultLabel(text: "Электронная почта", fontSize: 18, weight: .regular)
     private let loginTextField = TextField(placeholder: "Введите электронную почту", leftPadding: 20, cornerRadius: 12, roundedCorners: [.allCorners])
     private let passwordLabel = DefaultLabel(text: "Пароль", fontSize: 18, weight: .regular)
     private let passwordTextField = TextField(placeholder: "Введите пароль", leftPadding: 20, cornerRadius: 12, roundedCorners: [.allCorners])
@@ -24,7 +24,7 @@ class AuthScreenVC: UIViewController {
     private let registerButton = Button(setTitle: "Зарегистрироваться!")
     private let forgotPasswordButton = Button(setTitle: "Забыли пароль?")
     private let backButton = Button(setTitle: "Назад")
-    private let socialMediaLabel = SubTitleLabel(text: "Или вы можете подключиться с помощью:")
+    private let socialMediaLabel = SubTitleLabel(text: "Или вы можете подключиться с помощью: (в процессе разработки...)")
     private let socialMediaRectangleView = ComponentsBackground(cornerRadius: 16, corners: [.allCorners])
     
     // Используем новый класс AuthImages для создания логотипов
@@ -49,6 +49,7 @@ class AuthScreenVC: UIViewController {
         backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
         forgotPasswordButton.addTarget(self, action: #selector(goToForgotPassword), for: .touchUpInside)
         registerButton.addTarget(self, action: #selector(goToRegister), for: .touchUpInside)
+        authButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
         
         self.view.backgroundColor = Styles.Colors.appBackgoundColor
         
@@ -187,6 +188,31 @@ class AuthScreenVC: UIViewController {
     
     @objc private func dismissKeyboard() {
         view.endEditing(true)
+    }
+    
+    @objc private func loginButtonTapped() {
+        let loginRequest = LoginUserRequest(email: self.loginTextField.text ?? "",
+                                            password: self.passwordTextField.text ?? "")
+        if !Validator.isValidEmail(for: loginRequest.email) {
+            AlertManager.showInvalidEmailAlert(on: self)
+            return
+        }
+        
+        if !Validator.isPasswordValid(for: loginRequest.password) {
+            AlertManager.showInvalidPasswordAlert(on: self)
+            return
+        }
+        
+        AuthService.shared.signIn(with: loginRequest) { error in
+            if let error = error {
+                AlertManager.showSignInErrorAlert(on: self)
+                return
+            }
+            if let sceneDelegate = self.view.window?.windowScene?.delegate as? SceneDelegate {
+                sceneDelegate.checkAuthentication()
+            }
+        }
+        
     }
     
     @objc private func goToRegister() {

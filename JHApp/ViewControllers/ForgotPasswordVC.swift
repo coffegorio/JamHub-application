@@ -27,6 +27,7 @@ class ForgotPasswordVC: UIViewController {
         view.addGestureRecognizer(tapGesture)
         
         backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
+        forgotPasswordButton.addTarget(self, action: #selector(forgotPasswordButtonTapped), for: .touchUpInside)
         
         self.view.backgroundColor = Styles.Colors.appBackgoundColor
      
@@ -96,6 +97,24 @@ class ForgotPasswordVC: UIViewController {
     @objc private func backButtonTapped() {
         let authScreenVC = AuthScreenVC()
         navigationController?.pushViewController(authScreenVC, animated: true)
+    }
+    
+    @objc private func forgotPasswordButtonTapped() {
+        let email = self.forgotPasswordTextField.text ?? ""
+        if !Validator.isValidEmail(for: email) {
+            AlertManager.showInvalidEmailAlert(on: self)
+            return
+        }
+        
+        AuthService.shared.forgotPassword(with: email) { [weak self] error in
+            guard let self = self else {return}
+            if let error = error {
+                AlertManager.showErrorSendingPasswordReset(on: self, with: error)
+                return
+            }
+            
+            AlertManager.showPasswordResetSent(on: self)
+        }
     }
     
     @objc private func dismissKeyboard() {

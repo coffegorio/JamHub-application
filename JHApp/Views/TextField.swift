@@ -23,7 +23,7 @@ class TextField: UITextField {
         super.init(frame: .zero)
         
         self.placeholder = placeholder
-        self.textColor = .lightGray
+        self.textColor = .gray
         self.textAlignment = .left
         self.backgroundColor = Styles.Colors.appBackgoundColor
         

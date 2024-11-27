@@ -39,6 +39,7 @@ class RegistrationVC: UIViewController {
 
         // Установить действия для кнопок
         backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
+        registrationButton.addTarget(self, action: #selector(registerButtonTapped), for: .touchUpInside)
 
         // Установить фоновый цвет
         view.backgroundColor = Styles.Colors.appBackgoundColor
@@ -119,6 +120,35 @@ class RegistrationVC: UIViewController {
     }
 
     // MARK: - Actions
+    @objc private func registerButtonTapped() {
+        let registerUserRequest = RegisterUserRequest(email: self.emailTextField.text ?? "", password: self.passwordTextField.text ?? "")
+        if !Validator.isValidEmail(for: registerUserRequest.email) {
+            AlertManager.showInvalidEmailAlert(on: self)
+            return
+        }
+        
+        if !Validator.isPasswordValid(for: registerUserRequest.password) {
+            AlertManager.showInvalidPasswordAlert(on: self)
+            return
+        }
+        
+        AuthService.shared.registerUser(with: registerUserRequest) { [weak self]
+            wasRegistered, error in
+            guard let self = self else { return }
+            if let error = error {
+                AlertManager.showRegistrationErrorAlert(on: self, with: error)
+                return
+            }
+            if wasRegistered {
+                if let sceneDelegate = self.view.window?.windowScene?.delegate as? SceneDelegate {
+                    sceneDelegate.checkAuthentication()
+                } else {
+                    AlertManager.showRegistrationErrorAlert(on: self)
+                }
+            }
+        }
+    }
+    
     @objc private func backButtonTapped() {
         navigationController?.popViewController(animated: true)
     }
