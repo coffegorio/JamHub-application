@@ -7,6 +7,7 @@
 
 import UIKit
 import FirebaseAuth
+import FirebaseCore
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -25,10 +26,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     public func checkAuthentication() {
-        if Auth.auth().currentUser == nil {
-            goToController(with: WelcomeScreenVC())
+        if let currentUser = Auth.auth().currentUser {
+            print("Пользователь авторизован: \(currentUser.email ?? "неизвестно")")
+            goToController(with: HomeScreenVC())  // Если пользователь авторизован, показываем HomeScreen
         } else {
-            goToController(with: HomeScreenVC())
+            print("Пользователь не авторизован.")
+            goToController(with: WelcomeScreenVC())  // Если нет, показываем WelcomeScreen
         }
     }
 
