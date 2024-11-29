@@ -26,6 +26,9 @@ class TextField: UITextField {
         self.textColor = .gray
         self.textAlignment = .left
         self.backgroundColor = Styles.Colors.appBackgoundColor
+        self.autocorrectionType = .no
+        self.autocapitalizationType = .none
+        
         
         let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: leftPadding, height: 1))
         self.leftView = paddingView

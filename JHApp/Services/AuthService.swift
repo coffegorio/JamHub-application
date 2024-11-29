@@ -15,7 +15,7 @@ class AuthService {
     
     private init() {}
     
-    public func registerUser(with userRequest: RegisterUserRequest, completion:
+    public func registerUser(with userRequest: RegisterUserRequest, nickname: String , completion:
                              @escaping (Bool, Error?) -> Void) {
         let email = userRequest.email
         let password = userRequest.password
@@ -36,7 +36,8 @@ class AuthService {
                 .document(resultUser.uid)
                 .setData([
                     "email": email,
-                    "password": password
+                    "password": password,
+                    "nickname": nickname
                 ]) { error in
                     if let error = error {
                         completion(false, error)
@@ -75,24 +76,49 @@ class AuthService {
     }
     
     public func fetchUserCompletion(completion: @escaping (User?, Error?) -> Void) {
-        
         guard let userUID = Auth.auth().currentUser?.uid else {
+            completion(nil, NSError(domain: "", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not logged in"]))
             return
         }
         
         let db = Firestore.firestore()
-        
         db.collection("users")
             .document(userUID)
-            .getDocument() { snapshot, error in
+            .getDocument { snapshot, error in
                 if let error = error {
                     completion(nil, error)
                     return
                 }
                 
-                if let snapshot = snapshot, let snapshotData = snapshot.data(), let username = snapshotData ["username"] as? String {
-                    
+                if let snapshot = snapshot, let snapshotData = snapshot.data(),
+                   let email = snapshotData["email"] as? String,
+                   let nickname = snapshotData["nickname"] as? String {
+                    let user = User(email: email, userUID: userUID, nickname: nickname)
+                    completion(user, nil)
+                } else {
+                    completion(nil, NSError(domain: "", code: 404, userInfo: [NSLocalizedDescriptionKey: "User not found"]))
                 }
             }
     }
+    
+    public func updateNickname(to newNickname: String, completion: @escaping (Bool, Error?) -> Void) {
+        guard let userUID = Auth.auth().currentUser?.uid else {
+            completion(false, NSError(domain: "", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not logged in"]))
+            return
+        }
+
+        let db = Firestore.firestore()
+        db.collection("users")
+            .document(userUID)
+            .updateData([
+                "nickname": newNickname
+            ]) { error in
+                if let error = error {
+                    completion(false, error)
+                    return
+                }
+                completion(true, nil)
+            }
+    }
+    
 }

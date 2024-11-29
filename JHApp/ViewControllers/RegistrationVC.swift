@@ -121,19 +121,27 @@ class RegistrationVC: UIViewController {
 
     // MARK: - Actions
     @objc private func registerButtonTapped() {
-        let registerUserRequest = RegisterUserRequest(email: self.emailTextField.text ?? "", password: self.passwordTextField.text ?? "")
+        let registerUserRequest = RegisterUserRequest(
+            email: self.emailTextField.text ?? "",
+            password: self.passwordTextField.text ?? ""
+        )
+
+        // Проверка email
         if !Validator.isValidEmail(for: registerUserRequest.email) {
             AlertManager.showInvalidEmailAlert(on: self)
             return
         }
-        
+
+        // Проверка пароля
         if !Validator.isPasswordValid(for: registerUserRequest.password) {
             AlertManager.showInvalidPasswordAlert(on: self)
             return
         }
-        
-        AuthService.shared.registerUser(with: registerUserRequest) { [weak self]
-            wasRegistered, error in
+
+        // Генерация стандартного никнейма
+        let defaultNickname = "User\(Int.random(in: 1000...9999))"
+
+        AuthService.shared.registerUser(with: registerUserRequest, nickname: defaultNickname) { [weak self] wasRegistered, error in
             guard let self = self else { return }
             if let error = error {
                 AlertManager.showRegistrationErrorAlert(on: self, with: error)
