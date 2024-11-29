@@ -26,39 +26,34 @@ class AuthScreenVC: UIViewController {
     private let backButton = Button(setTitle: "Назад")
     private let socialMediaLabel = SubTitleLabel(text: "Или вы можете подключиться с помощью: (в процессе разработки...)")
     private let socialMediaRectangleView = ComponentsBackground(cornerRadius: 16, corners: [.allCorners])
-    
-    // Используем новый класс AuthImages для создания логотипов
     private let appleLogo = AuthImages(imageName: "appleLogo")
     private let vkLogo = AuthImages(imageName: "vkLogo")
     private let googleLogo = AuthImages(imageName: "googleLogo")
-    
-    // Создаем SocialMediaStackView для выравнивания логотипов с отступами
-    private lazy var socialMediaStackView: SocialMediaStackView = {
-        return SocialMediaStackView(appleLogo: appleLogo, vkLogo: vkLogo, googleLogo: googleLogo)
-    }()
+    private lazy var socialMediaStackView = SocialMediaStackView(appleLogo: appleLogo, vkLogo: vkLogo, googleLogo: googleLogo)
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        navigationController?.setNavigationBarHidden(true, animated: false)
-        scrollView.delaysContentTouches = false
-        
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        view.addGestureRecognizer(tapGesture)
-        
-        backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
-        forgotPasswordButton.addTarget(self, action: #selector(goToForgotPassword), for: .touchUpInside)
-        registerButton.addTarget(self, action: #selector(goToRegister), for: .touchUpInside)
-        authButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
-        
-        self.view.backgroundColor = Styles.Colors.appBackgoundColor
-        
+        setupView()
         setupScrollView()
         setupUI()
         setupConstraints()
+        setupActions()
+    }
+    
+    private func setupView() {
+        view.backgroundColor = Styles.Colors.appBackgoundColor
+        navigationController?.setNavigationBarHidden(true, animated: false)
+        setupDismissKeyboardGesture()
+    }
+    
+    private func setupDismissKeyboardGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGesture)
     }
     
     private func setupScrollView() {
+        scrollView.delaysContentTouches = false
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(scrollView)
         
@@ -68,119 +63,101 @@ class AuthScreenVC: UIViewController {
         scrollView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
-        
         contentView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
-            make.width.equalTo(scrollView) // Для вертикального скроллинга
+            make.width.equalTo(scrollView)
         }
     }
     
     private func setupUI() {
-        contentView.addSubview(titleLabel)
-        contentView.addSubview(subTitleLabel)
-        contentView.addSubview(authRectangleView)
-        contentView.addSubview(loginLabel)
-        contentView.addSubview(loginTextField)
-        contentView.addSubview(passwordLabel)
-        contentView.addSubview(passwordTextField)
-        contentView.addSubview(authButton)
-        contentView.addSubview(socialMediaLabel)
-        contentView.addSubview(socialMediaRectangleView)
-        contentView.addSubview(socialMediaStackView) // Добавляем stackView для логотипов
-        contentView.addSubview(registerButton)
-        contentView.addSubview(forgotPasswordButton)
-        contentView.addSubview(backButton)
+        [
+            titleLabel,
+            subTitleLabel,
+            authRectangleView,
+            loginLabel,
+            loginTextField,
+            passwordLabel,
+            passwordTextField,
+            authButton,
+            socialMediaLabel,
+            socialMediaRectangleView,
+            socialMediaStackView,
+            registerButton,
+            forgotPasswordButton,
+            backButton
+        ].forEach { contentView.addSubview($0) }
+    }
+    
+    private func setupActions() {
+        backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
+        forgotPasswordButton.addTarget(self, action: #selector(goToForgotPassword), for: .touchUpInside)
+        registerButton.addTarget(self, action: #selector(goToRegister), for: .touchUpInside)
+        authButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
+        authButton.addTarget(self, action: #selector(dismissKeyboard), for: .touchDown)
     }
     
     private func setupConstraints() {
         titleLabel.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(40)
-            make.trailing.equalToSuperview().inset(40)
-            make.top.equalToSuperview().offset(20) // Отступ сверху от contentView
+            make.leading.trailing.equalToSuperview().inset(40)
+            make.top.equalToSuperview().offset(20)
         }
-        
         subTitleLabel.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(30)
-            make.leading.equalTo(titleLabel.snp.leading)
-            make.trailing.equalTo(titleLabel.snp.trailing)
+            make.leading.trailing.equalTo(titleLabel)
         }
-        
         authRectangleView.snp.makeConstraints { make in
             make.top.equalTo(subTitleLabel.snp.bottom).offset(30)
-            make.leading.equalToSuperview().offset(20)
-            make.trailing.equalToSuperview().inset(20)
+            make.leading.trailing.equalToSuperview().inset(20)
         }
-        
         loginLabel.snp.makeConstraints { make in
-            make.top.equalTo(authRectangleView.snp.top).offset(30)
-            make.leading.equalTo(authRectangleView.snp.leading).offset(30)
-            make.trailing.equalTo(authRectangleView.snp.trailing).inset(20)
+            make.top.equalTo(authRectangleView).offset(30)
+            make.leading.trailing.equalTo(authRectangleView).inset(30)
         }
-        
         loginTextField.snp.makeConstraints { make in
             make.top.equalTo(loginLabel.snp.bottom).offset(15)
-            make.leading.equalTo(authRectangleView.snp.leading).offset(20)
-            make.trailing.equalTo(authRectangleView.snp.trailing).inset(20)
+            make.leading.trailing.equalTo(authRectangleView).inset(20)
             make.height.equalTo(50)
         }
-        
         passwordLabel.snp.makeConstraints { make in
             make.top.equalTo(loginTextField.snp.bottom).offset(30)
-            make.leading.equalTo(authRectangleView.snp.leading).offset(30)
-            make.trailing.equalTo(authRectangleView.snp.trailing).inset(20)
+            make.leading.trailing.equalTo(authRectangleView).inset(30)
         }
-        
         passwordTextField.snp.makeConstraints { make in
             make.top.equalTo(passwordLabel.snp.bottom).offset(15)
-            make.leading.equalTo(authRectangleView.snp.leading).offset(20)
-            make.trailing.equalTo(authRectangleView.snp.trailing).inset(20)
+            make.leading.trailing.equalTo(authRectangleView).inset(20)
             make.height.equalTo(50)
         }
-        
         authButton.snp.makeConstraints { make in
             make.top.equalTo(passwordTextField.snp.bottom).offset(20)
-            make.leading.equalTo(authRectangleView.snp.leading).offset(20)
-            make.trailing.equalTo(authRectangleView.snp.trailing).inset(20)
+            make.leading.trailing.equalTo(authRectangleView).inset(20)
             make.height.equalTo(50)
             make.bottom.equalTo(authRectangleView.snp.bottom).inset(30)
         }
-        
         socialMediaLabel.snp.makeConstraints { make in
             make.top.equalTo(authRectangleView.snp.bottom).offset(30)
-            make.leading.equalTo(titleLabel.snp.leading)
-            make.trailing.equalTo(titleLabel.snp.trailing)
+            make.leading.trailing.equalTo(titleLabel)
         }
-        
         socialMediaRectangleView.snp.makeConstraints { make in
             make.top.equalTo(socialMediaLabel.snp.bottom).offset(30)
-            make.leading.equalTo(authRectangleView.snp.leading)
-            make.trailing.equalTo(authRectangleView.snp.trailing)
+            make.leading.trailing.equalTo(authRectangleView)
             make.height.equalTo(120)
         }
-        
         socialMediaStackView.snp.makeConstraints { make in
-            make.centerY.equalTo(socialMediaRectangleView.snp.centerY)
-            make.centerX.equalTo(socialMediaRectangleView.snp.centerX)
+            make.center.equalTo(socialMediaRectangleView)
         }
-        
         registerButton.snp.makeConstraints { make in
             make.top.equalTo(socialMediaRectangleView.snp.bottom).offset(30)
-            make.leading.equalTo(authRectangleView.snp.leading)
-            make.trailing.equalTo(authRectangleView.snp.trailing)
+            make.leading.trailing.equalTo(authRectangleView)
             make.height.equalTo(50)
         }
-        
         forgotPasswordButton.snp.makeConstraints { make in
             make.top.equalTo(registerButton.snp.bottom).offset(20)
-            make.leading.equalTo(authRectangleView.snp.leading)
-            make.trailing.equalTo(authRectangleView.snp.trailing)
+            make.leading.trailing.equalTo(authRectangleView)
             make.height.equalTo(50)
         }
-        
         backButton.snp.makeConstraints { make in
             make.top.equalTo(forgotPasswordButton.snp.bottom).offset(20)
-            make.leading.equalTo(authRectangleView.snp.leading)
-            make.trailing.equalTo(authRectangleView.snp.trailing)
+            make.leading.trailing.equalTo(authRectangleView)
             make.height.equalTo(50)
             make.bottom.equalToSuperview().inset(50)
         }
@@ -191,18 +168,16 @@ class AuthScreenVC: UIViewController {
     }
     
     @objc private func loginButtonTapped() {
-        let loginRequest = LoginUserRequest(email: self.loginTextField.text ?? "",
-                                            password: self.passwordTextField.text ?? "")
+        let loginRequest = LoginUserRequest(email: loginTextField.text ?? "",
+                                            password: passwordTextField.text ?? "")
         if !Validator.isValidEmail(for: loginRequest.email) {
             AlertManager.showInvalidEmailAlert(on: self)
             return
         }
-        
         if !Validator.isPasswordValid(for: loginRequest.password) {
             AlertManager.showInvalidPasswordAlert(on: self)
             return
         }
-        
         AuthService.shared.signIn(with: loginRequest) { error in
             if let error = error {
                 AlertManager.showSignInErrorAlert(on: self)
@@ -212,7 +187,6 @@ class AuthScreenVC: UIViewController {
                 sceneDelegate.checkAuthentication()
             }
         }
-        
     }
     
     @objc private func goToRegister() {
@@ -221,7 +195,7 @@ class AuthScreenVC: UIViewController {
     }
     
     @objc private func goToForgotPassword() {
-        let forgotPasswordScreenVC = ForgotPasswordVC()
+        let forgotPasswordScreenVC = ForgotPasswordVС()
         navigationController?.pushViewController(forgotPasswordScreenVC, animated: true)
     }
     
@@ -230,5 +204,4 @@ class AuthScreenVC: UIViewController {
         navigationController?.pushViewController(welcomeScreenVC, animated: true)
     }
 }
-
 
